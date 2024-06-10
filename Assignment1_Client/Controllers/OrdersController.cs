@@ -39,9 +39,9 @@ namespace Assignment1_Client.Controllers
                 TempData["ErrorMessage"] = "You must login to view your order history.";
                 return RedirectToAction("Index", "Home", TempData);
             }
-            else if (role != "Admin")
+            else if (role != "Staff")
             {
-                TempData["ErrorMessage"] = "You must login as a admin to view orders.";
+                TempData["ErrorMessage"] = "You must login as a Staff to view orders.";
                 return RedirectToAction("Profile", "Staff", TempData);
             }
 

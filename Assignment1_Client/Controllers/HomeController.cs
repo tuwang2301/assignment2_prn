@@ -103,8 +103,8 @@ namespace Assignment1_Client.Controllers
         [HttpPost]
         public async Task<IActionResult> Register(Staff memberRequest)
         {
-            List<Staff> staff = await ApiHandler.DeserializeApiResponse<List<Staff>>(StaffApiUrl + "?$filter=Name eq" + memberRequest.Name, HttpMethod.Get);
-            Staff found = staff[0];
+            List<Staff> staff = await ApiHandler.DeserializeApiResponse<List<Staff>>(StaffApiUrl + "?$filter=Name eq '" + memberRequest.Name +"'", HttpMethod.Get);
+            Staff found = staff.FirstOrDefault();
             if (memberRequest.Name.Equals("admin") ||
                 (found != null && found.StaffId != 0))
             {
