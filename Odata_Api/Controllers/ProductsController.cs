@@ -29,7 +29,7 @@ namespace Odata_Api.Controllers
         }
 
         // PUT: odata/Products({pkey})
-        [HttpPut("{pkey}")]
+        [HttpPut("odata/Products/{pkey}")]
         [EnableQuery]
         public async Task<IActionResult> Put(int pkey, [FromBody] Product product)
         {
@@ -74,7 +74,7 @@ namespace Odata_Api.Controllers
         }
 
         // DELETE: odata/Products({pkey})
-        [HttpDelete("{pkey}")]
+        [HttpDelete("odata/Products/{pkey}")]
         [EnableQuery]
         public async Task<IActionResult> Delete(int pkey)
         {

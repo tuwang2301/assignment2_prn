@@ -26,10 +26,10 @@ namespace Odata_Api.Controllers
             }
             return Ok(_context.Staffs);
         }
-        
+
         
         // PUT: odata/Staffs({skey})
-        [HttpPut("{skey}")]
+        [HttpPut("odata/Staffs/{skey}")]
         [EnableQuery]
         public async Task<IActionResult> Put(int skey, [FromBody] Staff staff)
         {
@@ -74,7 +74,7 @@ namespace Odata_Api.Controllers
         }
 
         // DELETE: odata/Staffs({skey})
-        [HttpDelete("{skey}")]
+        [HttpDelete("odata/Staffs/{skey}")]
         [EnableQuery]
         public async Task<IActionResult> Delete(int skey)
         {
