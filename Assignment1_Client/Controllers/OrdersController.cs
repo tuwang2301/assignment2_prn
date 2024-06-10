@@ -331,10 +331,11 @@ namespace Assignment1_Client.Controllers
 
         public async Task<IActionResult> AddOrderItem(OrderRequest orderRequest)
         {
-            List<Product> listFlowerBouquets = await ApiHandler.DeserializeApiResponse<List<Product>>(ProductApiUrl, HttpMethod.Get);
+            string odataUrl = $"{ProductApiUrl}?$filter=ProductId eq {orderRequest.ProductId}";
+            List<Product> listFlowerBouquets = await ApiHandler.DeserializeApiResponse<List<Product>>(odataUrl, HttpMethod.Get);
 
-            Product product = listFlowerBouquets.Where(p => p.ProductId == orderRequest.ProductId).FirstOrDefault();
-            if (product == null)
+
+            Product product = listFlowerBouquets.FirstOrDefault(); if (product == null)
             {
                 TempData["ErrorMessage"] = "Product doesn't exist.";
                 return RedirectToAction("Create", TempData);
