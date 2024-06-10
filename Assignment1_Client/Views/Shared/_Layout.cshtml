@@ -47,7 +47,7 @@
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Staffs" asp-action="Profile">My Profile</a>
                             </li>
                         }
-                        else
+                        else if (Role == "Customer")
                         {
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Orders" asp-action="OrderHistory">Manage Order</a>
