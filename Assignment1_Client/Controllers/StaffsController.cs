@@ -279,7 +279,7 @@ namespace Assignment1_Client.Controllers
             {
                 Name = staffRequest.Name,
                 StaffId = staffRequest.Id,
-                Password = tempStaff.Password,
+                Password = staffRequest.Password,
             };
 
             if (tempStaff.Password == staffRequest.OldPassword)
