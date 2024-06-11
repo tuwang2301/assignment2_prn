@@ -41,13 +41,10 @@
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Staffs" asp-action="Index">Manage Staffs</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Orders" asp-action="Index">Report</a>
-                            </li>
-                            <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Staffs" asp-action="Profile">My Profile</a>
                             </li>
                         }
-                        else if (Role == "Customer")
+                        else if (Role == "Staff")
                         {
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Orders" asp-action="OrderHistory">Manage Order</a>

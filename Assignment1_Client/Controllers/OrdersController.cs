@@ -37,12 +37,12 @@ namespace Assignment1_Client.Controllers
             if (userId == null)
             {
                 TempData["ErrorMessage"] = "You must login to view your order history.";
-                return RedirectToAction("Index", "Home", TempData);
+                return RedirectToAction("Index", "Home");
             }
             else if (role != "Staff")
             {
                 TempData["ErrorMessage"] = "You must login as a Staff to view orders.";
-                return RedirectToAction("Profile", "Staff", TempData);
+                return RedirectToAction("Profile", "Staff");
             }
 
             List<Order> listOrders = await ApiHandler.DeserializeApiResponse<List<Order>>(OrderApiUrl, HttpMethod.Get);
@@ -64,12 +64,12 @@ namespace Assignment1_Client.Controllers
             if (userId == null)
             {
                 TempData["ErrorMessage"] = "You must login to view your order history.";
-                return RedirectToAction("Index", "Home", TempData);
+                return RedirectToAction("Index", "Home");
             }
             List<Order> listOrders = new List<Order>();
             try
             {
-                listOrders = await ApiHandler.DeserializeApiResponse<List<Order>>(OrderApiUrl + $"/staff/{userId.Value}", HttpMethod.Get);
+                listOrders = await ApiHandler.DeserializeApiResponse<List<Order>>(OrderApiUrl + $"?$filter=StaffId eq {userId.Value}", HttpMethod.Get);
             }catch(Exception e)
             {
                 TempData["ErrorMessage"] = e.Message;
@@ -92,26 +92,27 @@ namespace Assignment1_Client.Controllers
             if (userId == null)
             {
                 TempData["ErrorMessage"] = "You must login to view order details.";
-                return RedirectToAction("Index", "Home", TempData);
+                return RedirectToAction("Index", "Home");
             }
 
-            Order order = await ApiHandler.DeserializeApiResponse<Order>(OrderApiUrl + "/" + id, HttpMethod.Get);
+            List<Order> orderList = await ApiHandler.DeserializeApiResponse<List<Order>>(OrderApiUrl + $"?$expand=Staff&$filter=OrderId eq {id}", HttpMethod.Get);
+            Order order = orderList.FirstOrDefault();
             if (order == null)
             {
                 TempData["ErrorMessage"] = "Order not found.";
 
                 if (role == "Admin")
-                    return RedirectToAction("Index", "Order", TempData);
+                    return RedirectToAction("Index", "Order");
                 else
-                    return RedirectToAction("OrderHistory", "Order", TempData);
+                    return RedirectToAction("OrderHistory", "Order");
             }
             if (order.StaffId != userId.Value)
             {
                 TempData["ErrorMessage"] = "You don't have permission to view this order.";
-                return RedirectToAction("OrderHistory", "Order", TempData);
+                return RedirectToAction("OrderHistory", "Order");
             }
 
-            List<OrderDetail> listOrderDetails = await ApiHandler.DeserializeApiResponse<List<OrderDetail>>(OrderDetailApiUrl + $"/order/{id}", HttpMethod.Get);
+            List<OrderDetail> listOrderDetails = await ApiHandler.DeserializeApiResponse<List<OrderDetail>>(OrderDetailApiUrl + $"?$expand=Product&$filter=OrderId eq {id}", HttpMethod.Get);
 
             if (TempData != null)
             {
@@ -134,13 +135,13 @@ namespace Assignment1_Client.Controllers
             if (userId == null)
             {
                 TempData["ErrorMessage"] = "You must login to delete order";
-                return RedirectToAction("Index", "Home", TempData);
+                return RedirectToAction("Index", "Home");
             }
             //if (role == "Customer")
             else
             {
                 TempData["ErrorMessage"] = "You don't have permission to delete order";
-                return RedirectToAction("OrderHistory", "Order", TempData);
+                return RedirectToAction("OrderHistory", "Order");
             }
 
             Order order = await ApiHandler.DeserializeApiResponse<Order>(OrderApiUrl + "/" + id, HttpMethod.Get);
@@ -179,7 +180,7 @@ namespace Assignment1_Client.Controllers
             else
             {
                 TempData["ErrorMessage"] = "You don't have permission to delete order";
-                return RedirectToAction("OrderHistory", "Order", TempData);
+                return RedirectToAction("OrderHistory", "Order");
             }
 
             int orderId = int.Parse(orderIdStr);
@@ -187,7 +188,7 @@ namespace Assignment1_Client.Controllers
             if (order == null)
             {
                 TempData["ErrorMessage"] = "Order not found.";
-                return RedirectToAction("Index", "Order", TempData);
+                return RedirectToAction("Index", "Order");
             }
 
 
@@ -259,7 +260,7 @@ namespace Assignment1_Client.Controllers
             if (userId == null)
             {
                 TempData["ErrorMessage"] = "You must login to create order.";
-                return RedirectToAction("Index", "Home", TempData);
+                return RedirectToAction("Index", "Home");
             }
 
             List<Staff> listMembers = await ApiHandler.DeserializeApiResponse<List<Staff>>(StaffApiUrl, HttpMethod.Get);
@@ -320,12 +321,12 @@ namespace Assignment1_Client.Controllers
             if (role != "Admin")
             {
                 TempData["SuccessMessage"] = "Create order successfully.";
-                return RedirectToAction("OrderHistory", TempData);
+                return RedirectToAction("OrderHistory");
             }
             else
             {
                 TempData["SuccessMessage"] = "Create order successfully.";
-                return RedirectToAction("Index", TempData);
+                return RedirectToAction("Index");
             }
         }
 
@@ -338,7 +339,7 @@ namespace Assignment1_Client.Controllers
             Product product = listFlowerBouquets.FirstOrDefault(); if (product == null)
             {
                 TempData["ErrorMessage"] = "Product doesn't exist.";
-                return RedirectToAction("Create", TempData);
+                return RedirectToAction("Create");
             }
 
             List<OrderItemRequest> listItemsRequest = GetOrderItems();
