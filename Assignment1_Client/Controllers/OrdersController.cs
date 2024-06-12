@@ -39,11 +39,11 @@ namespace Assignment1_Client.Controllers
                 TempData["ErrorMessage"] = "You must login to view your order history.";
                 return RedirectToAction("Index", "Home");
             }
-            else if (role != "Staff")
-            {
-                TempData["ErrorMessage"] = "You must login as a Staff to view orders.";
-                return RedirectToAction("Profile", "Staff");
-            }
+            //else if (role != "Staff")
+            //{
+            //    TempData["ErrorMessage"] = "You must login as a Staff to view orders.";
+            //    return RedirectToAction("Profile", "Staff");
+            //}
 
             List<Order> listOrders = await ApiHandler.DeserializeApiResponse<List<Order>>(OrderApiUrl, HttpMethod.Get);
 
@@ -207,7 +207,7 @@ namespace Assignment1_Client.Controllers
 
         public async Task<IActionResult> Report(string startDate, string endDate)
         {
-            List<Order> listOrders = await ApiHandler.DeserializeApiResponse<List<Order>>(OrderApiUrl, HttpMethod.Get);
+            List<Order> listOrders = await ApiHandler.DeserializeApiResponse<List<Order>>(OrderApiUrl + "?$expand=Staff", HttpMethod.Get);
 
             if (startDate != null && endDate == null)
             {
@@ -248,7 +248,7 @@ namespace Assignment1_Client.Controllers
             ViewData["EndDate"] = endDate;
             ViewData["Orders"] = listOrders;
 
-            return View();
+            return RedirectToAction("Index", "Orders");
         }
 
 
@@ -290,7 +290,9 @@ namespace Assignment1_Client.Controllers
             }
             int? userId = HttpContext.Session.GetInt32("USERID");
             string role = HttpContext.Session.GetString("ROLE");
+
             int staffId = orderRequest.StaffId;
+            DateTime orderDate = orderRequest.OrderDate.ToLocalTime();
             if (role != "Admin")
             {
                 staffId = HttpContext.Session.GetInt32("USERID").Value;
@@ -299,8 +301,15 @@ namespace Assignment1_Client.Controllers
             Order order = new Order()
             {
                 StaffId = staffId,
-                OrderDate = DateTime.Now,
+                OrderDate = orderDate,
+                
             };
+            //Order orderToPost = new Order()
+            //{
+            //    StaffId = staffId,
+            //    OrderDate = orderDate,
+
+            //};
             Order orderSaved = await ApiHandler.DeserializeApiResponse<Order>(OrderApiUrl, HttpMethod.Post, order);
 
             foreach (OrderItemRequest itemRequest in listItemsRequest)

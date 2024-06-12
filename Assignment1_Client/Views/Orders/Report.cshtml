@@ -1,6 +1,6 @@
 ﻿@{
-    string startDate = ViewData["StartDate"] != null ? DateTime.Parse(ViewData["StartDate"].ToString()).ToString("dddd, dd MMMM yyyy HH:mm:ss") : "Past";
-    string endDate = ViewData["EndDate"] != null ? DateTime.Parse(ViewData["EndDate"].ToString()).ToString("dddd, dd MMMM yyyy HH:mm:ss") : "Now";
+    string startDate = ViewData["StartDate"] != null ? DateTime.Parse(ViewData["StartDate"].ToString()).ToString("dddd, dd MMMM yyyy ") : "Past";
+    string endDate = ViewData["EndDate"] != null ? DateTime.Parse(ViewData["EndDate"].ToString()).ToString("dddd, dd MMMM yyyy ") : "Now";
     List<Odata_Api.Models.Order> orders = ViewData["Orders"] != null ? (List<Odata_Api.Models.Order>)ViewData["Orders"] : new List<Odata_Api.Models.Order>();
 }
 
@@ -30,20 +30,20 @@
                 <th>
                     Ordered Date
                 </th>
-                <th>
+            @*   <th>
                     Shipped Date
                 </th>
-           @*      <th>
+                 <th>
                     Total
                 </th>
                 <th>
                     Status
-                </th> *@
+                </th> 
                 <th>
                     Freight
-                </th>
+                </th>*@
                 <th>
-                    Member Email
+                Staff Name
                 </th>
             </tr>
         </thead>
@@ -59,6 +59,10 @@
                     <td>
                         @item.OrderDate
                     </td>
+                    <td>
+                        @item.Staff.Name
+                      </td>
+                   
                 </tr>
             }
      @*        <tr>

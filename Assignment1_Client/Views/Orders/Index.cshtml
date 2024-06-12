@@ -13,13 +13,14 @@
     var startOfMonth = new DateTime(currentDate.Year, currentDate.Month, currentDate.Day, 7, 0, 0);
     var oneMonthBefore = currentDate.AddMonths(-1);
     // Format dates for the datetime-local input fields
-    var currentDateString = currentDate.ToString("yyyy-MM-ddTHH:mm");
-    var oneDayBeforeString = oneDayBefore.ToString("yyyy-MM-ddTHH:mm");
-    var startOfMonthString = startOfMonth.ToString("yyyy-MM-ddTHH:mm");
-    var oneMonthBeforeString = oneMonthBefore.ToString("yyyy-MM-ddTHH:mm");
+    var currentDateString = currentDate.ToString("yyyy-MM-dd");
+    var oneDayBeforeString = oneDayBefore.ToString("yyyy-MM-dd");
+    var startOfMonthString = startOfMonth.ToString("yyyy-MM-dd");
+    var oneMonthBeforeString = oneMonthBefore.ToString("yyyy-MM-dd");
 }
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
+   @if (@Role != "Admin")
+                {
 <div class="d-flex justify-content-between align-items-center mb-2">
     <h1>List orders</h1>
 
@@ -27,7 +28,7 @@
         <a asp-action="Create" class="btn btn-dark">Create New</a>
     </p>
 </div>
-
+         }
 @if (ViewData["ErrorMessage"] != null)
 {
     <div class="alert alert-danger" role="alert">@ViewData["ErrorMessage"]</div>
@@ -45,29 +46,31 @@
             <div class="col-5">
                 <div class="form-group mb-2">
                     <label for="startDate" class="control-label">Start Date</label>
-                    <input id="startDate" name="startDate" type="datetime-local" class="form-control" />
+                    <input id="startDate" name="startDate" type="date" class="form-control " value="@oneMonthBeforeString" />
                 </div>
             </div>
             <div class="col-5">
                 <div class="form-group mb-2">
                     <label for="endDate" class="control-label">End Date</label>
-                    <input id="endDate" name="endDate" type="datetime-local" class="form-control" />
+                    <input id="endDate" name="endDate" type="date" class="form-control" value="@currentDateString" />
                 </div>
             </div>
             <div class="col-2">
                 <div class="form-group mb-2">
                     <label for="endDate" class="control-label"></label>
-                    <input type="submit" value="Generate" class="btn btn-success d-block" />
+                    <input id="generateButton" type="submit" value="Generate" class="btn btn-success d-block" />
                 </div>
             </div>
         </div>
     </form>
 }
+@if (@Role != "Admin")
+{
         <div class="form-group mb-2">
             <label for="orderDate" class="control-label">Search by Order Date</label>
-            <input id="orderDate" name="orderDate" type="datetime-local" class="form-control" value="@currentDateString" />
+            <input id="orderDate" name="orderDate" type="date" class="form-control" value="@currentDateString" />
         </div>
-    </div>
+}
 
 @if (Model.Count() == 0)
 {
@@ -108,105 +111,147 @@
                             @Html.DisplayFor(modelItem => item.Staff.Name)
                         </td>
                     }
-                    else
-                    {
+                 
                         <td>
                             <a class="btn btn-primary" asp-action="Detail" asp-route-id="@item.OrderId">Details</a>
                         </td>
-                    }
+                    
                 </tr>
             }
         </tbody>
     </table>
-}
+}<script>
+     $(document).ready(function () {
+         $('#orderDate').change(function () {
+             var orderDate = $('#orderDate').val();
+             var role = '@Role';
 
-<script>
-    $(document).ready(function () {
-        $('#orderDate').change(function () {
-            var orderDate = $('#orderDate').val();
-            var role = '@Role';
-            console.log(orderDate);
-            console.log(role)
-            loadData(orderDate ,role);
-        });
-        function loadData(orderDate ,role) {
-            $.ajax({
-                url: 'http://localhost:5059/api/Orders/date',
-                type: 'GET',
-                data: { orderDate: orderDate,role:role },
-                success: function (data) {
-                    var tableBody = $('#orderTableBody');
-                    tableBody.empty(); // Clear existing data
-                    data.forEach(function (item) {
+             loadData(orderDate, role);
+         });
 
-                        if (role === "Admin" || item.staffId === @userId) {
-                            console.log(item.staffId);
-                            var formattedOrderDate = formatDate(item.orderDate);
+         document.getElementById("generateButton").addEventListener("click", function (event) {
+             event.preventDefault(); // Ngăn chặn việc gửi biểu mẫu mặc định
 
-                            var row = '<tr>' +
-                                '<td>' + item.orderId + '</td>' +
-                                '<td>' + formattedOrderDate + '</td>';
+             // Lấy giá trị của ngày bắt đầu và ngày kết thúc
+             var startDate = document.getElementById("startDate").value;
+             var endDate = document.getElementById("endDate").value;
 
-                            if (role == "Admin") {
-                                getStaffName(item.staffId, function (staffName) {
-                                    row += '<td>' + staffName + '</td>';
-                                    row += '<td><a class="btn btn-primary" href="/Order/Details/' + item.orderId + '">Details</a></td>' +
-                                        '</tr>';
-                                    tableBody.append(row);
-                                });
-                            } else {
-                                row += '<td><a class="btn btn-primary" href="/Order/Details/' + item.orderId + '">Details</a></td>' +
-                                    '</tr>';
-                                tableBody.append(row);
-                            }
-                        }
-                    });
-                    console.log(data);
-                },
-                error: function (xhr, status, error) {
-                    console.error(error);
-                    $('#orderTableBody').html('<tr><td colspan="3">No Order found.</td></tr>');
-                }
-            });
-        }
-       
-        function formatDate(dateString) {
-            var date = new Date(dateString);
+             loadDataRp(startDate, endDate);
+         });
 
-            var day = date.getDate();
-            var month = date.getMonth() + 1;
-            var year = date.getFullYear();
+         function loadData(orderDate, role) {
+             $.ajax({
+                 url: 'http://localhost:5059/date',
+                 type: 'GET',
+                 data: { orderDate: orderDate, role: role },
+                 success: function (data) {
+                     if (!Array.isArray(data)) {
+                         data = [data];
+                     }
 
-            var hour = date.getHours();
-            var minute = date.getMinutes();
-            var second = date.getSeconds();
+                     var tableBody = $('#orderTableBody');
+                     tableBody.empty(); // Clear existing data
+                     data.forEach(function (item) {
+                         if (role === "Admin" || item.staffId === @userId) {
+                             console.log(item.staffId);
+                             var formattedOrderDate = formatDate(item.orderDate);
 
-            var ampm = hour >= 12 ? 'CH' : 'SA';
-            hour = hour % 12;
-            hour = hour ? hour : 12; // 0 giờ sẽ được chuyển thành 12 giờ
+                             var row = '<tr>' +
+                                 '<td>' + item.orderId + '</td>' +
+                                 '<td>' + formattedOrderDate + '</td>';
 
-            // Thêm số 0 vào trước nếu cần thiết
-            day = day < 10 ? '0' + day : day;
-            month = month < 10 ? '0' + month : month;
-            hour = hour < 10 ? '0' + hour : hour;
-            minute = minute < 10 ? '0' + minute : minute;
-            second = second < 10 ? '0' + second : second;
+                             if (role === "Admin") {
+                                 getStaffName(item.staffId, function (staffName) {
+                                     row += '<td>' + staffName + '</td>';
+                                     row += '<td><a class="btn btn-primary" href="/Order/Details/' + item.orderId + '">Details</a></td>' +
+                                         '</tr>';
+                                     tableBody.append(row);
+                                 });
+                             } else {
+                                 row += '<td><a class="btn btn-primary" href="/Order/Details/' + item.orderId + '">Details</a></td>' +
+                                     '</tr>';
+                                 tableBody.append(row);
+                             }
+                         }
+                     });
+                 },
+                 error: function (xhr, status, error) {
+                     console.error(error);
+                     $('#orderTableBody').html('<tr><td colspan="3">No Order found.</td></tr>');
+                 }
+             });
+         }
 
-            return day + '/' + month + '/' + year + ' ' + hour + ':' + minute + ':' + second + ' ' + ampm;
-        }
+         function loadDataRp(startDate, endDate) {
+             $.ajax({
+                 url: `http://localhost:5059/odata/Orders?$expand=Staff&$filter=OrderDate ge ${startDate} and OrderDate le ${endDate}`,
+                 type: 'GET',
+                 success: function (response) {
+                     var data = response.value; // Truy cập vào thuộc tính 'value' để lấy mảng đơn hàng
+                     var tableBody = $('#orderTableBody');
+                     tableBody.empty(); // Clear existing data
 
-        function getStaffName(staffId, callback) {
-            $.ajax({
-                url: 'http://localhost:5059/api/Staffs/' + staffId,
-                type: 'GET',
-                success: function (data) {
-                    callback(data.name);
-                },
-                error: function (xhr, status, error) {
-                    console.error(error);
-                    callback('N/A'); // Display "N/A" if there's an error
-                }
-            });
-        }
-    });
+                     if (data.length === 0) {
+                         tableBody.html('<tr><td colspan="4">No Order found.</td></tr>');
+                     } else {
+                         data.forEach(function (item) {
+                             var formattedOrderDate = formatDate(item.OrderDate);
+                             var row = '<tr>' +
+                                 '<td>' + item.OrderId + '</td>' +
+                                 '<td>' + formattedOrderDate + '</td>' +
+                                 '<td>' + item.Staff.Name + '</td>' + // Hiển thị tên nhân viên trực tiếp
+                                 '<td><a class="btn btn-primary" href="http://localhost:5207/Orders/Detail/'" + item.OrderId + '">Details</a></td>' +
+
+                                 '</tr>';
+                             tableBody.append(row);
+                         });
+                     }
+                 },
+                 error: function (xhr, status, error) {
+                     console.error(error);
+                     $('#orderTableBody').html('<tr><td colspan="4">Error loading orders.</td></tr>');
+                 }
+             });
+         }
+
+         function formatDate(dateString) {
+             var date = new Date(dateString);
+
+             var day = date.getDate();
+             var month = date.getMonth() + 1;
+             var year = date.getFullYear();
+
+             var hour = date.getHours();
+             var minute = date.getMinutes();
+             var second = date.getSeconds();
+
+             var ampm = hour >= 12 ? 'CH' : 'SA';
+             hour = hour % 12;
+             hour = hour ? hour : 12; // 0 giờ sẽ được chuyển thành 12 giờ
+
+             // Thêm số 0 vào trước nếu cần thiết
+             day = day < 10 ? '0' + day : day;
+             month = month < 10 ? '0' + month : month;
+             hour = hour < 10 ? '0' + hour : hour;
+             minute = minute < 10 ? '0' + minute : minute;
+             second = second < 10 ? '0' + second : second;
+
+             return day + '/' + month + '/' + year + ' ' + hour + ':' + minute + ':' + second + ' ' + ampm;
+         }
+
+         function getStaffName(staffId, callback) {
+             $.ajax({
+                 url: 'http://localhost:5059/odata/Staffs/' + staffId,
+                 type: 'GET',
+                 success: function (data) {
+                     callback(data.name);
+                 },
+                 error: function (xhr, status, error) {
+                     console.error(error);
+                     callback('N/A'); // Display "N/A" if there's an error
+                 }
+             });
+         }
+     });
 </script>
+

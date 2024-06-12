@@ -67,7 +67,7 @@ namespace Odata_Api.Controllers
             {
                 return Problem("Entity set 'MyStoreContext.Orders'  is null.");
             }
-
+           
             _context.Orders.Add(order);
             await _context.SaveChangesAsync();
 
